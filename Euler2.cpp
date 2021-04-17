@@ -1,12 +1,25 @@
+// #include "stdafx.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include "Euler2.h"
-
+// #include "vector"
 
 void Euler::Decoding()
 {
-
+    m_rho = new double[count_elements1];
+    m_w1 = new double[count_elements1];
+    m_w2 = new double[count_elements1];
+    m_w3 = new double[count_elements1];
+    pressure = new double[count_elements1];
+    for (int j = 0; j < count_elements1; ++j)
+    {
+        m_rho[j] = m_u0[j];
+        m_w1[j] = m_u1[j] / m_rho[j];
+        m_w2[j] = m_u2[j] / m_rho[j];
+        m_w3[j] = m_u3[j] / m_rho[j];
+        pressure[j] = 0.4 * (m_u4[j] - m_rho[j] * 0.5 * (m_w1[j] * m_w1[j] + m_w2[j] * m_w2[j] + m_w3[j] * m_w3[j]));
+    }
 }
 
 void Euler::SaveMeshInGMSHFile()
