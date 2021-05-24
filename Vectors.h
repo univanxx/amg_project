@@ -17,10 +17,16 @@ public:
 	{
 		return size;
 	};
+	double* getElements() const  // Получение элементов вектора
+	{
+		return elements;
+	};
 	void addElement(int position, double element);  // Добавляем скаляр к элементу с нужной позицией
 	double findNorm() const;  // Норма L_{2}
 	Vector& operator =(const Vector& vector);  // Оператор присваивания
+	Vector& operator =(const double* vector);  // Ещё один ператор присваивания
 	Vector operator *(const double& number) const;  // Оператор умножения на скаляр
+	Vector operator /(const double& number) const;  // Оператор деления на скаляр
 	double operator *(const Vector& vector) const;  // Оператор умножения на вектор
 	Vector& operator +=(const  Vector& vector);  // Оператор сложения векторов
 	Vector& operator -=(const  Vector& vector);  // Оператор вычитания векторов
