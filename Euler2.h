@@ -37,10 +37,6 @@ extern mesh::hexahedron2* hexahedrons2;
 class Euler
 {
 public:
-
-    void SaveMeshInGMSHFile();
-    void SaveSolutionInGMSHFile();
-
     // консервативные переменные
     double* m_u0, * m_u1, * m_u2, * m_u3, * m_u4;
     // примитивные переменные
@@ -48,6 +44,38 @@ public:
     // универсальная газовая постоянная [Дж / (кг * К)]
     double m_R = 286.7;
 
+	void SaveMeshInGMSHFile();
+	void SaveSolutionInGMSHFile();
+	// Конструктор
+	Euler()
+	{
+		m_u0 = new double[count_elements1];
+		m_u1 = new double[count_elements1];
+		m_u2 = new double[count_elements1];
+		m_u3 = new double[count_elements1];
+		m_u4 = new double[count_elements1];
+
+		m_rho = new double[count_elements1];
+		m_w1 = new double[count_elements1];
+		m_w2 = new double[count_elements1];
+		m_w3 = new double[count_elements1];
+		pressure = new double[count_elements1];
+
+		for (int j = 0; j < count_elements1; ++j)
+		{
+			m_u0[j] = 0.0;
+			m_u1[j] = 0.0;
+			m_u2[j] = 0.0;
+			m_u3[j] = 0.0;
+			m_u4[j] = 0.0;
+
+			m_rho[j] = 0.0;
+			m_w1[j] = 0.0;
+			m_w2[j] = 0.0;
+			m_w3[j] = 0.0;
+			pressure[j] = 0.0;
+		}
+	}
 protected:
 
     // пересчитывает консервативные переменные в примитивные
@@ -55,9 +83,10 @@ protected:
 
     // gmsh-файл в который сохраняется решение
     std::string m_gmsh_file = "C:/Users/wchhi/source/repos/EulerProj/EulerProj/results/res.msh";
-    // ДЛЯ ЗАДАЧИ: время = 1, шаг = 0.1
+	//std::string m_gmsh_file = "C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/results/res.msh";
+    // ДЛЯ ЗАДАЧИ: время = 1, шаг = 0.05
     double m_time_moment = 1;
-    uint32_t m_step = 0.1;
+    double m_step = 0.05;
 };
 
 #endif // EULER_H

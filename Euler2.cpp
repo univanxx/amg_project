@@ -1,4 +1,4 @@
-// #include "stdafx.h"
+//#include "stdafx.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -7,11 +7,6 @@
 
 void Euler::Decoding()
 {
-    m_rho = new double[count_elements1];
-    m_w1 = new double[count_elements1];
-    m_w2 = new double[count_elements1];
-    m_w3 = new double[count_elements1];
-    pressure = new double[count_elements1];
     for (int j = 0; j < count_elements1; ++j)
     {
         m_rho[j] = m_u0[j];
@@ -208,4 +203,10 @@ void Euler::SaveSolutionInGMSHFile()
     std::ofstream ofst(m_gmsh_file.c_str(), std::ios_base::app);
     ofst << ar.str();
     ofst.close();
+
+    delete[] m_rho;
+    delete[] m_w1;
+    delete[] m_w2;
+    delete[] m_w3;
+    delete[] pressure;
 }

@@ -1,3 +1,4 @@
+//#include "stdafx.h"
 #include "Vectors.h"
 
 
@@ -34,6 +35,16 @@ double Vector::findNorm() const
 	return sqrt(result);
 }
 
+Vector& Vector::operator =(const double* vector)
+{
+	size = (*this).getSize();
+	for (int i = 0; i < size; ++i)
+	{
+		elements[i] = vector[i];
+	}
+	return (*this);
+}
+
 Vector& Vector::operator =(const Vector& vector)
 {
 	size = vector.getSize();
@@ -50,6 +61,16 @@ Vector Vector::operator *(const double& number) const
 	for (int i = 0; i < size; ++i)
 	{
 		result[i] *= number;
+	}
+	return result;
+}
+
+Vector Vector::operator /(const double& number) const
+{
+	Vector result((*this));
+	for (int i = 0; i < size; ++i)
+	{
+		result[i] /= number;
 	}
 	return result;
 }
