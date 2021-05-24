@@ -1,4 +1,4 @@
-﻿// #include "stdafx.h"
+// #include "stdafx.h"
 #include <iostream>
 using namespace std;
 #include "main.h"
@@ -163,7 +163,6 @@ Matrix Jacobian(int j, Matrix U)
 int main()
 {
 	setlocale(LC_ALL, "Russian");
-	/*
 	// mesh::LoadMesh("C:/Users/wchhi/source/repos/EulerProj/EulerProj/meshes/mymesh.txt");
 	mesh::LoadMesh("C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/meshes/mymesh.txt");
 	// Шаг по времени
@@ -221,9 +220,9 @@ int main()
 		Matrix A(count_elements1, count_elements1);
 		// Вектор правой части СЛАУ
 		Matrix B(count_elements1, 5);
-		for (int j = 0; j <= count_boundary_surfaces1; ++j)
+		for (int j = 0; j < count_internal_surfaces1; ++j)
 		{
-			A.setElement(isurfaces1[j].element1, isurfaces1[j].element1, 0.5);
+			A.setElement(isurfaces1[j].element1, isurfaces1[j].element2, 0.5);
 			B[isurfaces1[j].element1] = F_hll(j, epsilon, U);
 				// Надо установить фиктивный элемент для граничных рёбер
 		}
@@ -237,7 +236,7 @@ int main()
 			cout << endl;
 		}
 	}
-	*/
+	/*
 	Matrix A(3, 3);
 	for (int row = 0; row < 3; ++row)
 	{
@@ -483,4 +482,3 @@ int main()
 	system("pause");
 	return 0;
 }
-

@@ -1,4 +1,5 @@
 //#include "stdafx.h"
+
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -20,7 +21,7 @@ void Euler::Decoding()
 void Euler::SaveMeshInGMSHFile()
 {
     std::ostringstream ar;
-    int N = 0; // количество точек на реальной поверхности
+    int N = 0; // ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГІГ®Г·ГҐГЄ Г­Г  Г°ГҐГ Г«ГјГ­Г®Г© ГЇГ®ГўГҐГ°ГµГ­Г®Г±ГІГЁ
     for (int i = 0; i < count_points1; ++i)
         if (points1[i].is_node_on_real_border)
             ++N;
@@ -68,7 +69,7 @@ void Euler::SaveMeshInGMSHFile()
         ny = bsurfaces2[j].ny;
         nz = bsurfaces2[j].nz;
 
-        // запись четырёхугольников
+        // Г§Г ГЇГЁГ±Гј Г·ГҐГІГ»Г°ВёГµГіГЈГ®Г«ГјГ­ГЁГЄГ®Гў
         if (j < count_boundary_quadrangles2)
         {
             if (nx * (y1 * z2 - y2 * z1) - ny * (x1 * z2 - x2 * z1) + nz * (x1 * y2 - x2 * y1) > 0.0)
@@ -78,7 +79,7 @@ void Euler::SaveMeshInGMSHFile()
                 ar << j + 1 << " " << 3 << " " << 0 << " " << points1[bsurfaces2[j].A].output_number << " " << points1[bsurfaces2[j].D].output_number << \
                 " " << points1[bsurfaces2[j].C].output_number << " " << points1[bsurfaces2[j].B].output_number << std::endl;
         }
-        // запись треугольников
+        // Г§Г ГЇГЁГ±Гј ГІГ°ГҐГіГЈГ®Г«ГјГ­ГЁГЄГ®Гў
         else
         {
             if (nx * (y1 * z2 - y2 * z1) - ny * (x1 * z2 - x2 * z1) + nz * (x1 * y2 - x2 * y1) > 0.0)
@@ -98,7 +99,7 @@ void Euler::SaveMeshInGMSHFile()
 void Euler::SaveSolutionInGMSHFile()
 {
     Decoding();
-    static int N = 0; // количество точек на реальной поверхности
+    static int N = 0; // ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГІГ®Г·ГҐГЄ Г­Г  Г°ГҐГ Г«ГјГ­Г®Г© ГЇГ®ГўГҐГ°ГµГ­Г®Г±ГІГЁ
     if (!N)
         for (int i = 0; i < count_points1; ++i)
             if (points1[i].is_node_on_real_border)

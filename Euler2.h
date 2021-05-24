@@ -37,16 +37,16 @@ extern mesh::hexahedron2* hexahedrons2;
 class Euler
 {
 public:
-    // консервативные переменные
+    // ГЄГ®Г­Г±ГҐГ°ГўГ ГІГЁГўГ­Г»ГҐ ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»ГҐ
     double* m_u0, * m_u1, * m_u2, * m_u3, * m_u4;
-    // примитивные переменные
+    // ГЇГ°ГЁГ¬ГЁГІГЁГўГ­Г»ГҐ ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»ГҐ
     double* m_rho, * m_w1, * m_w2, * m_w3, * pressure;
-    // универсальная газовая постоянная [Дж / (кг * К)]
+    // ГіГ­ГЁГўГҐГ°Г±Г Г«ГјГ­Г Гї ГЈГ Г§Г®ГўГ Гї ГЇГ®Г±ГІГ®ГїГ­Г­Г Гї [Г„Г¦ / (ГЄГЈ * ГЉ)]
     double m_R = 286.7;
 
 	void SaveMeshInGMSHFile();
 	void SaveSolutionInGMSHFile();
-	// Конструктор
+	// ГЉГ®Г­Г±ГІГ°ГіГЄГІГ®Г°
 	Euler()
 	{
 		m_u0 = new double[count_elements1];
@@ -76,17 +76,29 @@ public:
 			pressure[j] = 0.0;
 		}
 	}
+  
+    // ГЄГ®Г­Г±ГҐГ°ГўГ ГІГЁГўГ­Г»ГҐ ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»ГҐ
+    double* m_u0, * m_u1, * m_u2, * m_u3, * m_u4;
+    // ГЇГ°ГЁГ¬ГЁГІГЁГўГ­Г»ГҐ ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»ГҐ
+    double* m_rho, * m_w1, * m_w2, * m_w3, * pressure;
+    // ГіГ­ГЁГўГҐГ°Г±Г Г«ГјГ­Г Гї ГЈГ Г§Г®ГўГ Гї ГЇГ®Г±ГІГ®ГїГ­Г­Г Гї [Г„Г¦ / (ГЄГЈ * ГЉ)]
+    double m_R = 286.7;
+
 protected:
 
-    // пересчитывает консервативные переменные в примитивные
+    // ГЇГҐГ°ГҐГ±Г·ГЁГІГ»ГўГ ГҐГІ ГЄГ®Г­Г±ГҐГ°ГўГ ГІГЁГўГ­Г»ГҐ ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»ГҐ Гў ГЇГ°ГЁГ¬ГЁГІГЁГўГ­Г»ГҐ
     void Decoding();
 
-    // gmsh-файл в который сохраняется решение
+    // gmsh-ГґГ Г©Г« Гў ГЄГ®ГІГ®Г°Г»Г© Г±Г®ГµГ°Г Г­ГїГҐГІГ±Гї Г°ГҐГёГҐГ­ГЁГҐ
     std::string m_gmsh_file = "C:/Users/wchhi/source/repos/EulerProj/EulerProj/results/res.msh";
-	//std::string m_gmsh_file = "C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/results/res.msh";
-    // ДЛЯ ЗАДАЧИ: время = 1, шаг = 0.05
+	  //std::string m_gmsh_file = "C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/results/res.msh";
+    // Г„Г‹Гџ Г‡ГЂГ„ГЂГ—Г€: ГўГ°ГҐГ¬Гї = 1, ГёГ ГЈ = 0.05
     double m_time_moment = 1;
     double m_step = 0.05;
+    // Г„Г‹Гџ Г‡ГЂГ„ГЂГ—Г€: ГўГ°ГҐГ¬Гї = 1, ГёГ ГЈ = 0.1
+    double m_time_moment = 1;
+    uint32_t m_step = 0.1;
+
 };
 
 #endif // EULER_H
