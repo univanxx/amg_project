@@ -7,6 +7,7 @@ using namespace std;
 #include "Vectors.h"
 #include "Matrices.h"
 #include "Tensors.h"
+#include "Tensor4.h"
 #include <math.h>
 #include <algorithm>
 
@@ -44,7 +45,7 @@ Vector get_fluxes(Vector primitives)
 	return F;
 }
 
-Vector F_hll(int j, double epsilon, Matrix U)
+Vector F_hll(int j, double epsilon, Matrix &U)
 {
 	Matrix T(5, 5);
 	if (fabs(isurfaces1[j].nz - 1.0) < epsilon)
@@ -114,58 +115,183 @@ Vector F_hll(int j, double epsilon, Matrix U)
 	return F_res;
 }
 
-Matrix Jacobian(int j, Matrix U)
+Matrix R(int j, const Matrix &U)
 {
 	// Консервативыне переменные элемента1, находим по ребру. Нормаль к ребру = нормаль к элементу1.
-	Vector conservatives = U[isurfaces1[j].element1];
+	Vector conservatives(5);
+	conservatives = U.getElements()[isurfaces1[j].element1];
 	Vector primitives = get_primitives(conservatives);
 	double v_n = primitives[1] * isurfaces1[j].nx + primitives[2] * isurfaces1[j].ny + primitives[3] * isurfaces1[j].nz;
 	double a = 1.4 * primitives[4] / primitives[0];
 	double h = a / 0.4;
 	double e_k = 0.5 * (primitives[1] * primitives[1] + primitives[2] * primitives[2] + primitives[3] * primitives[3]);
 	double h_0 = h + e_k;
+	// Правые собственные вектора Якобиана
+	Matrix R(5, 5);
+	for (int i = 0; i < 5; ++i)
+	{
+		R.setElement(0, 0, 1);
+		R.setElement(1, 0, primitives[1] - a * isurfaces1[j].nx);
+		R.setElement(2, 0, primitives[2] - a * isurfaces1[j].ny);
+		R.setElement(3, 0, primitives[3] - a * isurfaces1[j].nz);
+		R.setElement(4, 0, h_0 - a * v_n);
 
-	Matrix A(5, 5);
-	A.setElement(0, 0, 0.0);
-	A.setElement(1, 0, 0.4 * e_k * isurfaces1[j].nx - primitives[1] * v_n);
-	A.setElement(2, 0, 0.4 * e_k * isurfaces1[j].ny - primitives[2] * v_n);
-	A.setElement(3, 0, 0.4 * e_k * isurfaces1[j].nz - primitives[3] * v_n);
-	A.setElement(4, 0, v_n * (0.4 * e_k - h_0));
+		R.setElement(0, 1, 1);
+		R.setElement(1, 1, primitives[1]);
+		R.setElement(2, 1, primitives[2]);
+		R.setElement(3, 1, primitives[3]);
+		R.setElement(4, 1, e_k);
 
-	A.setElement(0, 1, isurfaces1[j].nx);
-	A.setElement(1, 1, v_n + 0.6 * primitives[1] * isurfaces1[j].nx);
-	A.setElement(2, 1, primitives[2] * isurfaces1[j].nx - 0.4 * primitives[1] * isurfaces1[j].ny);
-	A.setElement(3, 1, primitives[3] * isurfaces1[j].nx - 0.4 * primitives[1] * isurfaces1[j].nz);
-	A.setElement(4, 1, h_0 * isurfaces1[j].nx - 0.4 * primitives[1] * v_n);
+		R.setElement(0, 2, 1);
+		R.setElement(1, 2, primitives[1] + a * isurfaces1[j].nx);
+		R.setElement(2, 2, primitives[2] + a * isurfaces1[j].ny);
+		R.setElement(3, 2, primitives[3] + a * isurfaces1[j].nz);
+		R.setElement(4, 2, h_0 + a * v_n);
 
-	A.setElement(0, 2, isurfaces1[j].ny);
-	A.setElement(1, 2, primitives[1] * isurfaces1[j].ny - 0.4 * primitives[2] * isurfaces1[j].nx);
-	A.setElement(2, 2, v_n + 0.6 * primitives[2] * isurfaces1[j].ny);
-	A.setElement(3, 2, primitives[3] * isurfaces1[j].ny - 0.4 * primitives[2] * isurfaces1[j].nz);
-	A.setElement(4, 2, h_0 * isurfaces1[j].ny - 0.4 * primitives[2] * v_n);
+		R.setElement(0, 3, 0);
+		R.setElement(1, 3, isurfaces1[j].ny);
+		R.setElement(2, 3, -isurfaces1[j].nx);
+		R.setElement(3, 3, 0);
+		R.setElement(4, 3, primitives[1] * isurfaces1[j].ny - primitives[2] * isurfaces1[j].nx);
 
-	A.setElement(0, 3, isurfaces1[j].nz);
-	A.setElement(1, 3, primitives[1] * isurfaces1[j].nz - 0.4 * primitives[3] * isurfaces1[j].nx);
-	A.setElement(2, 3, primitives[2] * isurfaces1[j].nz - 0.4 * primitives[3] * isurfaces1[j].ny);
-	A.setElement(3, 3, v_n + 0.6 * primitives[3] * isurfaces1[j].nz);
-	A.setElement(4, 3, h_0 * isurfaces1[j].nz - 0.4 * primitives[3] * v_n);
-
-	A.setElement(0, 4, 0.0);
-	A.setElement(1, 4, 0.4 * isurfaces1[j].nx);
-	A.setElement(2, 4, 0.4 * isurfaces1[j].ny);
-	A.setElement(3, 4, 0.4 * isurfaces1[j].nz);
-	A.setElement(4, 4, 1.4 * v_n);
-
-	return A;
+		R.setElement(0, 4, 0);
+		R.setElement(1, 4, -isurfaces1[j].nz);
+		R.setElement(2, 4, 0);
+		R.setElement(3, 4, isurfaces1[j].nx);
+		R.setElement(4, 4, primitives[3] * isurfaces1[j].nx - primitives[1] * isurfaces1[j].nz);
+	}
+	return R;
 }
 
+Matrix L(int j, const Matrix &U)
+{
+	// Консервативыне переменные элемента1, находим по ребру. Нормаль к ребру = нормаль к элементу1.
+	Vector conservatives(5);
+	conservatives = U.getElements()[isurfaces1[j].element1];
+	Vector primitives = get_primitives(conservatives);
+	double v_n = primitives[1] * isurfaces1[j].nx + primitives[2] * isurfaces1[j].ny + primitives[3] * isurfaces1[j].nz;
+	double a = 1.4 * primitives[4] / primitives[0];
+	double h = a / 0.4;
+	double e_k = 0.5 * (primitives[1] * primitives[1] + primitives[2] * primitives[2] + primitives[3] * primitives[3]);
+	double h_0 = h + e_k;
+	// Левые собственные вектора Якобиана
+	Matrix L(5, 5);
+	for (int i = 0; i < 5; ++i)
+	{
+		L.setElement(0, 0, (0.4 * e_k + a * v_n) / (2 * a * a));
+		L.setElement(0, 1, (-0.4 * primitives[1] - a * isurfaces1[j].nx) / (2 * a * a));
+		L.setElement(0, 2, (-0.4 * primitives[2] - a * isurfaces1[j].ny) / (2 * a * a));
+		L.setElement(0, 3, (-0.4 * primitives[3] - a * isurfaces1[j].nz) / (2 * a * a));
+		L.setElement(0, 4, 0.4 / (2 * a * a));
+
+		L.setElement(1, 0, (a * a - 0.4 * e_k) / (a * a));
+		L.setElement(1, 1, (0.4 * primitives[1]) / (a * a));
+		L.setElement(1, 2, (0.4 * primitives[2]) / (a * a));
+		L.setElement(1, 3, (0.4 * primitives[3]) / (a * a));
+		L.setElement(1, 4, 0.4 / (a * a));
+
+		L.setElement(2, 0, (0.4 * e_k - a * v_n) / (2 * a * a));
+		L.setElement(2, 1, (-0.4 * primitives[1] + a * isurfaces1[j].nx) / (2 * a * a));
+		L.setElement(2, 2, (-0.4 * primitives[2] + a * isurfaces1[j].ny) / (2 * a * a));
+		L.setElement(2, 3, (-0.4 * primitives[3] + a * isurfaces1[j].nz) / (2 * a * a));
+		L.setElement(2, 4, 0.4 / (2 * a * a));
+
+		L.setElement(3, 0, (primitives[2] - v_n * isurfaces1[j].ny) / isurfaces1[j].nx);
+		L.setElement(3, 1, isurfaces1[j].ny);
+		L.setElement(3, 2, (isurfaces1[j].ny * isurfaces1[j].ny - 1) / isurfaces1[j].nx);
+		L.setElement(3, 3, (isurfaces1[j].ny * isurfaces1[j].nz) / isurfaces1[j].nx);
+		L.setElement(3, 4, 0);
+
+		L.setElement(4, 0, (-primitives[3] + v_n * isurfaces1[j].nz) / isurfaces1[j].nx);
+		L.setElement(4, 1, -isurfaces1[j].nz);
+		L.setElement(4, 2, (-isurfaces1[j].ny * isurfaces1[j].nz) / isurfaces1[j].nx);
+		L.setElement(4, 3, (1 - isurfaces1[j].nz * isurfaces1[j].nz) / isurfaces1[j].nx);
+		L.setElement(4, 4, 0);
+	}
+	return L;
+}
+
+Matrix I_m(int j, const Matrix &U)
+{
+	// Консервативыне переменные элемента1, находим по ребру. Нормаль к ребру = нормаль к элементу1.
+	Vector conservatives(5);
+	conservatives = U.getElements()[isurfaces1[j].element1];
+	Vector primitives = get_primitives(conservatives);
+	double v_n = primitives[1] * isurfaces1[j].nx + primitives[2] * isurfaces1[j].ny + primitives[3] * isurfaces1[j].nz;
+	double a = 1.4 * primitives[4] / primitives[0];
+	double h = a / 0.4;
+	double e_k = 0.5 * (primitives[1] * primitives[1] + primitives[2] * primitives[2] + primitives[3] * primitives[3]);
+	double h_0 = h + e_k;
+	// Диагональная матрица 
+	Matrix I(5, 5);
+	for (int i = 0; i < 5; ++i)
+	{
+		I.setElement(0, 0, v_n - a);
+		I.setElement(1, 1, v_n);
+		I.setElement(2, 2, v_n + a);
+		I.setElement(3, 3, v_n);
+		I.setElement(4, 4, v_n);
+	}
+	return I;
+}
+
+Matrix m_plus(Matrix M)
+{
+	for (int i = 0; i < M.getColumns(); ++i)
+	{
+		M.setElement(i, i, 0.5 * (M.getElements()[i][i] + abs(M.getElements()[i][i])));
+	}
+	return M;
+}
+
+Matrix m_minus(Matrix M)
+{
+	for (int i = 0; i < M.getColumns(); ++i)
+	{
+		M.setElement(i, i, 0.5 * (M.getElements()[i][i] - abs(M.getElements()[i][i])));
+	}
+	return M;
+}
+
+// Якобиан целиком
+/*
+Matrix A(5, 5);
+A.setElement(0, 0, 0.0);
+A.setElement(1, 0, 0.4 * e_k * isurfaces1[j].nx - primitives[1] * v_n);
+A.setElement(2, 0, 0.4 * e_k * isurfaces1[j].ny - primitives[2] * v_n);
+A.setElement(3, 0, 0.4 * e_k * isurfaces1[j].nz - primitives[3] * v_n);
+A.setElement(4, 0, v_n * (0.4 * e_k - h_0));
+
+A.setElement(0, 1, isurfaces1[j].nx);
+A.setElement(1, 1, v_n + 0.6 * primitives[1] * isurfaces1[j].nx);
+A.setElement(2, 1, primitives[2] * isurfaces1[j].nx - 0.4 * primitives[1] * isurfaces1[j].ny);
+A.setElement(3, 1, primitives[3] * isurfaces1[j].nx - 0.4 * primitives[1] * isurfaces1[j].nz);
+A.setElement(4, 1, h_0 * isurfaces1[j].nx - 0.4 * primitives[1] * v_n);
+
+A.setElement(0, 2, isurfaces1[j].ny);
+A.setElement(1, 2, primitives[1] * isurfaces1[j].ny - 0.4 * primitives[2] * isurfaces1[j].nx);
+A.setElement(2, 2, v_n + 0.6 * primitives[2] * isurfaces1[j].ny);
+A.setElement(3, 2, primitives[3] * isurfaces1[j].ny - 0.4 * primitives[2] * isurfaces1[j].nz);
+A.setElement(4, 2, h_0 * isurfaces1[j].ny - 0.4 * primitives[2] * v_n);
+
+A.setElement(0, 3, isurfaces1[j].nz);
+A.setElement(1, 3, primitives[1] * isurfaces1[j].nz - 0.4 * primitives[3] * isurfaces1[j].nx);
+A.setElement(2, 3, primitives[2] * isurfaces1[j].nz - 0.4 * primitives[3] * isurfaces1[j].ny);
+A.setElement(3, 3, v_n + 0.6 * primitives[3] * isurfaces1[j].nz);
+A.setElement(4, 3, h_0 * isurfaces1[j].nz - 0.4 * primitives[3] * v_n);
+
+A.setElement(0, 4, 0.0);
+A.setElement(1, 4, 0.4 * isurfaces1[j].nx);
+A.setElement(2, 4, 0.4 * isurfaces1[j].ny);
+A.setElement(3, 4, 0.4 * isurfaces1[j].nz);
+A.setElement(4, 4, 1.4 * v_n);
+*/
 
 int main()
 {
 	setlocale(LC_ALL, "Russian");
-	/*
-	// mesh::LoadMesh("C:/Users/wchhi/source/repos/EulerProj/EulerProj/meshes/mymesh.txt");
-	mesh::LoadMesh("C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/meshes/mymesh.txt");
+	mesh::LoadMesh("C:/Users/wchhi/source/repos/EulerProj/EulerProj/meshes/mymesh.txt");
+	//mesh::LoadMesh("C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/meshes/mymesh.txt");
 	// Шаг по времени
 	double tau = 0.05;
 	const double epsilon = 1e-10;
@@ -217,27 +343,27 @@ int main()
 			U.setElement(j, 3, primitive.getElements()[j][3] * primitive.getElements()[j][0]);
 			U.setElement(j, 4, 2.5 * primitive.getElements()[j][4] + primitive.getElements()[j][0] * 0.5 * (primitive.getElements()[j][1] * primitive.getElements()[j][1] + primitive.getElements()[j][2] * primitive.getElements()[j][2] + primitive.getElements()[j][3] * primitive.getElements()[j][3]));
 		}
-		// Матрица системы - для начала 0 и 1 для элементов и их соседей
-		Matrix A(count_elements1, count_elements1);
-		// Вектор правой части СЛАУ
+		// Матрица системы - блочная
+		Tensor4 A(count_elements1, count_elements1, 5, 5);
+		// Вектор правой части СЛАУ - блочный
 		Matrix B(count_elements1, 5);
-		for (int j = 0; j <= count_boundary_surfaces1; ++j)
+		for (int j = 0; j < count_internal_surfaces1; ++j)
 		{
-			A.setElement(isurfaces1[j].element1, isurfaces1[j].element1, 0.5);
-			B[isurfaces1[j].element1] = F_hll(j, epsilon, U);
-				// Надо установить фиктивный элемент для граничных рёбер
-		}
-		double **res = A.getElements();
-		for (int row = 0; row < count_elements1; ++row)
-		{
-			for (int col = 0; col < count_elements1; ++col)
+			Matrix I(5, 5);
+			for (int k = 0; k < 5; ++k)
 			{
-				cout << res[row][col] << " ";
+				I.setElement(k, k, 1);
 			}
-			cout << endl;
+			A.addMatrix(isurfaces1[j].element1, isurfaces1[j].element1, I + (R(j, U) * m_plus(I_m(j, U)) * L(j, U)) * (tau * isurfaces1[isurfaces1[j].element1].area / hexahedrons1[isurfaces1[j].element1].volume));
+			A.setMatrix(isurfaces1[j].element1, isurfaces1[j].element2, (R(j, U) * m_minus(I_m(j, U)) * L(j, U)) * (tau * isurfaces1[isurfaces1[j].element1].area / hexahedrons1[isurfaces1[j].element1].volume));
+			
+			B.addVector(isurfaces1[j].element1, (R(j, U) * m_plus(I_m(j, U)) * L(j, U) * U[isurfaces1[j].element1] + R(j, U) * m_minus(I_m(j, U)) * L(j, U) * U[isurfaces1[j].element2] - F_hll(j, epsilon, U))
+				* (tau * isurfaces1[isurfaces1[j].element1].area / hexahedrons1[isurfaces1[j].element1].volume) + U[isurfaces1[j].element1]);
 		}
+		// Надо установить фиктивный элемент для граничных рёбер
+
 	}
-	*/
+	/*
 	Matrix A(3, 3);
 	for (int row = 0; row < 3; ++row)
 	{
@@ -471,6 +597,7 @@ int main()
 		}
 	}
 	efvm.SaveSolutionInGMSHFile();
+	*/
 	delete[] points1;
 	delete[] isurfaces1;
 	delete[] bsurfaces1;
@@ -479,7 +606,6 @@ int main()
 	delete[] isurfaces2;
 	delete[] bsurfaces2;
 	delete[] hexahedrons2;
-	*/
 	system("pause");
 	return 0;
 }

@@ -37,6 +37,13 @@ void Matrix::addElement(int row, int column, double element)
 	(*this).elements[row][column] += element;
 }
 
+void Matrix::addVector(int row, const Vector& vector)
+{
+	for (int i = 0; i < (*this).getColumns(); ++i)
+	{
+		(*this).addElement(row, i, vector.getElements()[i]);
+	}
+}
 Matrix Matrix::transpose() const
 {
 	Matrix result(columns, rows);

@@ -73,7 +73,6 @@ int main()
 			primitive.setElement(i, 4, 0.125);
 		}
 	}
-
 	cout << "Граничные условия для сверхзвуковой границы входа:" << endl;
 	Vector v_lim(3);
 	v_lim[0] = 1.5;
@@ -109,6 +108,7 @@ int main()
 		for (int j = 0; j < count_internal_surfaces1; ++j)
 		{
 			Matrix T(5, 5);
+			//cout << isurfaces1[j].nx << isurfaces1[j].ny << isurfaces1[j].nz << endl;
 			if (fabs(isurfaces1[j].nz - 1.0) < epsilon)
 			{
 				T.setElement(0, 0, 1.0);
@@ -145,6 +145,10 @@ int main()
 			//cout << T << endl;
 			Vector primitive_left = get_primitives(U_left);
 			Vector primitive_right = get_primitives(U_right);
+			//cout << primitive_left << endl;
+			//cout << primitive_right << endl;
+			//cout << U_left << endl;
+			//cout << U_right << endl;
 			// Скорость звука
 			double a_left = sqrt(1.4 * (primitive_left[4] / primitive_left[0]));
 			double a_right = sqrt(1.4 *(primitive_right[4] / primitive_right[0]));
@@ -180,8 +184,8 @@ int main()
 			// Обноваление значений
 			for (int k = 0; k < 5; ++k)
 			{
-				U_new.getElements()[isurfaces1[j].element1][k] -= (F_res[k] * (tau * isurfaces1[isurfaces1[j].element1].area / hexahedrons1[isurfaces1[j].element1].volume));
-				U_new.getElements()[isurfaces1[j].element2][k] += (F_res[k] * (tau * isurfaces1[isurfaces1[j].element2].area / hexahedrons1[isurfaces1[j].element2].volume));
+				U_new.getElements()[isurfaces1[j].element1][k] -= (F_res[k] * (tau * isurfaces1[j].area / hexahedrons1[isurfaces1[j].element1].volume));
+				U_new.getElements()[isurfaces1[j].element2][k] += (F_res[k] * (tau * isurfaces1[j].area / hexahedrons1[isurfaces1[j].element1].volume));
 			}
 		}
 		// Проходимся по граничным элементам
@@ -219,6 +223,8 @@ int main()
 				T.setElement(3, 3, sqrt(1.0 - bsurfaces1[j].nz * bsurfaces1[j].nz));
 				T.setElement(4, 4, 1.0);
 			}
+			//cout << bsurfaces1[j].nz << endl;
+			//cout << T << endl;
 			// Переход в локальную систему координат
 			Vector U_rotated = T * U[bsurfaces1[j].element1];
 			Vector primitive_rotated = get_primitives(U_rotated);
@@ -266,7 +272,7 @@ int main()
 			//cout << F_res << endl;
 			for (int k = 0; k < 5; ++k)
 			{
-				U_new.getElements()[bsurfaces1[j].element1][k] -= (F_res[k] * (tau * bsurfaces1[bsurfaces1[j].element1].area / hexahedrons1[bsurfaces1[j].element1].volume));
+				U_new.getElements()[bsurfaces1[j].element1][k] -= (F_res[k] * (tau * bsurfaces1[j].area / hexahedrons1[bsurfaces1[j].element1].volume));
 			}
 		}
 
@@ -279,6 +285,10 @@ int main()
 			primitive.getElements()[j][2] = U_new[j][2] / primitive.getElements()[j][0];
 			primitive.getElements()[j][3] = U_new[j][3] / primitive.getElements()[j][0];
 			primitive.getElements()[j][4] = 0.4 * (U_new[j][4] - primitive.getElements()[j][0] * 0.5 *(primitive.getElements()[j][1] * primitive.getElements()[j][1] + primitive.getElements()[j][2] * primitive.getElements()[j][2] + primitive.getElements()[j][3] * primitive.getElements()[j][3]));
+			//cout << U.getElements()[j][0] << U.getElements()[j][1] << U.getElements()[j][2] << U.getElements()[j][3] << U.getElements()[j][4] << endl;
+			//cout << U_new.getElements()[j][0] << U_new.getElements()[j][1] << U_new.getElements()[j][2] << U_new.getElements()[j][3] << U_new.getElements()[j][4] << endl;
+			//cout << primitive.getElements()[j][0] << primitive.getElements()[j][1] << primitive.getElements()[j][2] << primitive.getElements()[j][3] << primitive.getElements()[j][4] << endl;
+			//cout << "--------------------------------------------------------------------------" << endl;
 		}
 		if (i == 4)
 		{

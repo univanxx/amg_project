@@ -3,7 +3,7 @@
 #include "Matrices.h"
 #include "Vectors.h"
 
-Tensor::Tensor(int number_axis, int number_rows, int number_columns) : axis(number_axis), rows(number_rows), columns(number_columns)
+Tensor3::Tensor3(int number_axis, int number_rows, int number_columns) : axis(number_axis), rows(number_rows), columns(number_columns)
 {
 	elements = new double** [axis];
 	for (int i = 0; i < axis; ++i)
@@ -21,7 +21,7 @@ Tensor::Tensor(int number_axis, int number_rows, int number_columns) : axis(numb
 }
 
 
-Tensor::Tensor(const Tensor& tensor) : axis(tensor.axis), rows(tensor.rows), columns(tensor.columns)
+Tensor3::Tensor3(const Tensor3& tensor) : axis(tensor.axis), rows(tensor.rows), columns(tensor.columns)
 {
 	elements = new double** [axis];
 	for (int i = 0; i < axis; ++i)
@@ -39,18 +39,18 @@ Tensor::Tensor(const Tensor& tensor) : axis(tensor.axis), rows(tensor.rows), col
 }
 
 
-void Tensor::setElement(int axle, int row, int column, double element)
+void Tensor3::setElement(int axle, int row, int column, double element)
 {
 	(*this).elements[axle][row][column] = element;
 }
 
-void Tensor::addElement(int axle, int row, int column, double element)
+void Tensor3::addElement(int axle, int row, int column, double element)
 {
 	(*this).elements[axle][row][column] += element;
 }
 
 
-Tensor& Tensor::operator =(const Tensor& tensor)
+Tensor3& Tensor3::operator =(const Tensor3& tensor)
 {
 	axis = tensor.getAxes();
 	rows = tensor.getRows();
@@ -68,7 +68,7 @@ Tensor& Tensor::operator =(const Tensor& tensor)
 	return (*this);
 }
 
-Matrix Tensor::operator [](const int index)
+Matrix& Tensor3::operator [](const int index)
 {
 	int len_column = (*this).getColumns();
 	int len_row = (*this).getRows();
@@ -85,7 +85,7 @@ Matrix Tensor::operator [](const int index)
 
 
 
-std::ostream& operator<<(std::ostream& out_stream, const Tensor& tensor)
+std::ostream& operator<<(std::ostream& out_stream, const Tensor3& tensor)
 {
 	for (int i = 0; i < tensor.axis; ++i)
 	{
