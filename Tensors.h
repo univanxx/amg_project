@@ -4,7 +4,7 @@
 #include "Matrices.h"
 #include <iostream>
 
-class Tensor
+class Tensor3
 {
 private:
 	int axis;
@@ -13,8 +13,8 @@ private:
 	double*** elements;
 
 public:
-	Tensor(int number_axis, int number_rows, int number_columns);  // Создаётся нулевой тензор заданных размеров
-	Tensor(const Tensor& tensor);  // Копирование
+	Tensor3(int number_axis, int number_rows, int number_columns);  // Создаётся нулевой тензор заданных размеров
+	Tensor3(const Tensor3& tensor);  // Копирование
 	double*** getElements() const  // Получение элементов тензора
 	{
 		return elements;
@@ -34,12 +34,11 @@ public:
 	void setElement(int axle, int row, int column, double element);  // Передача элемента в заданную позицию
 	void addElement(int axle, int row, int column, double element);  // Добавление элемента к заданному значению
 
-	Tensor& operator =(const Tensor& tensor);  // Оператор присваивания
-	Matrix operator [](const int index);
-	//Matrix operator *(const Matrix& matrix) const;  // Оператор умножения на матрицу -> в результате получается вектор
+	Tensor3& operator =(const Tensor3& tensor);  // Оператор присваивания
+	Matrix& operator [](const int index);
 
-	friend std::ostream& operator<<(std::ostream&, const Tensor& tensor);
-	~Tensor()  // Деструктор
+	friend std::ostream& operator<<(std::ostream&, const Tensor3& tensor);
+	~Tensor3()  // Деструктор
 	{
 		for (int i = 0; i < axis; ++i)
 		{

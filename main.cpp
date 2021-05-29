@@ -184,8 +184,8 @@ int main()
 			// Обноваление значений
 			for (int k = 0; k < 5; ++k)
 			{
-				U_new.getElements()[isurfaces1[j].element1][k] -= (F_res[k] * (tau * isurfaces1[isurfaces1[j].element1].area / hexahedrons1[isurfaces1[j].element1].volume));
-				U_new.getElements()[isurfaces1[j].element2][k] += (F_res[k] * (tau * isurfaces1[isurfaces1[j].element2].area / hexahedrons1[isurfaces1[j].element2].volume));
+				U_new.getElements()[isurfaces1[j].element1][k] -= (F_res[k] * (tau * isurfaces1[j].area / hexahedrons1[isurfaces1[j].element1].volume));
+				U_new.getElements()[isurfaces1[j].element2][k] += (F_res[k] * (tau * isurfaces1[j].area / hexahedrons1[isurfaces1[j].element1].volume));
 			}
 		}
 		// Проходимся по граничным элементам
@@ -272,7 +272,7 @@ int main()
 			//cout << F_res << endl;
 			for (int k = 0; k < 5; ++k)
 			{
-				U_new.getElements()[bsurfaces1[j].element1][k] -= (F_res[k] * (tau * bsurfaces1[bsurfaces1[j].element1].area / hexahedrons1[bsurfaces1[j].element1].volume));
+				U_new.getElements()[bsurfaces1[j].element1][k] -= (F_res[k] * (tau * bsurfaces1[j].area / hexahedrons1[bsurfaces1[j].element1].volume));
 			}
 		}
 
