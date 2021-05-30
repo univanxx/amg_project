@@ -1,4 +1,4 @@
-﻿// #include "stdafx.h"
+// #include "stdafx.h"
 #include <iostream>
 using namespace std;
 #include "main.h"
@@ -6,6 +6,7 @@ using namespace std;
 #include "Euler2.h"
 #include "Vectors.h"
 #include "Matrices.h"
+
 #include <math.h>
 #include <algorithm>
 
@@ -42,7 +43,6 @@ Vector get_fluxes(Vector primitives)
 	F[4] = primitives[1] * (primitives[4] + 2.5 * primitives[4] + primitives[0] * 0.5 * (primitives[1] * primitives[1] + primitives[2] * primitives[2] + primitives[3] * primitives[3]));
 	return F;
 }
-
 
 int main()
 {
