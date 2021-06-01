@@ -20,7 +20,7 @@ extern mesh::boundary_surface2* bsurfaces2;
 extern mesh::hexahedron2* hexahedrons2;
 
 // Получение вектора примитивных переменных
-Vector get_primitives(Vector conservatives)
+Vector get_primitives(Vector& conservatives)
 {
 	Vector primitive(5);
 	primitive[0] = conservatives[0];
@@ -32,7 +32,7 @@ Vector get_primitives(Vector conservatives)
 }
 
 // Получение вектора потоков
-Vector get_fluxes(Vector primitives)
+Vector get_fluxes(Vector& primitives)
 {
 	Vector F(5);
 	F[0] = primitives[0] * primitives[1];
@@ -102,14 +102,12 @@ int main()
 		}
 		// Вектор для обновлённых значений U
 		Matrix U_new = U;
-
-		cout << "Проходимся по внутренним граням -> по сумме рёбер" << endl;
+		cout << "Проходимся по внутренним граням" << endl;
 		// Проходимся по внутренним элементам
 		for (int j = 0; j < count_internal_surfaces1; ++j)
 		{
 			Matrix T(5, 5);
-			//cout << isurfaces1[j].nx << isurfaces1[j].ny << isurfaces1[j].nz << endl;
-			if (fabs(isurfaces1[j].nz - 1.0) < epsilon)
+			if (abs(isurfaces1[j].nz - 1.0) < epsilon)
 			{
 				T.setElement(0, 0, 1.0);
 				T.setElement(1, 3, 1.0);
@@ -117,7 +115,7 @@ int main()
 				T.setElement(4, 4, 1.0);
 				T.setElement(3, 1, -1.0);
 			}
-			else if (fabs(isurfaces1[j].nz + 1.0) < epsilon)
+			else if (abs(isurfaces1[j].nz + 1.0) < epsilon)
 			{
 				T.setElement(0, 0, 1.0);
 				T.setElement(1, 3, -1.0);
@@ -125,7 +123,7 @@ int main()
 				T.setElement(4, 4, 1.0);
 				T.setElement(3, 1, 1.0);
 			}
-			else if (fabs(isurfaces1[j].nz*isurfaces1[j].nz - 1.0) > epsilon)
+			else if (abs(isurfaces1[j].nz*isurfaces1[j].nz - 1.0) > epsilon)
 			{
 				T.setElement(0, 0, 1.0);
 				T.setElement(1, 1, isurfaces1[j].nx);
@@ -138,24 +136,18 @@ int main()
 				T.setElement(3, 3, sqrt(1.0 - isurfaces1[j].nz * isurfaces1[j].nz));
 				T.setElement(4, 4, 1.0);
 			}
-			//cout << T << endl;
 			// Нахождение потока по методу HLL. Переход в локальную систему координат
 			Vector U_left = T * U[isurfaces1[j].element1];
 			Vector U_right = T * U[isurfaces1[j].element2];
-			//cout << T << endl;
+
 			Vector primitive_left = get_primitives(U_left);
 			Vector primitive_right = get_primitives(U_right);
-			//cout << primitive_left << endl;
-			//cout << primitive_right << endl;
-			//cout << U_left << endl;
-			//cout << U_right << endl;
 			// Скорость звука
 			double a_left = sqrt(1.4 * (primitive_left[4] / primitive_left[0]));
 			double a_right = sqrt(1.4 *(primitive_right[4] / primitive_right[0]));
-			//cout << a_left << " " << a_right << endl;
 			// Нормальная компонента скорости 
-			double absVec_L = fabs(primitive_left[1]);
-			double absVec_R = fabs(primitive_right[1]);
+			double absVec_L = abs(primitive_left[1]);
+			double absVec_R = abs(primitive_right[1]);
 			// Скорости волн 
 			double S_r = max(absVec_L + a_left, absVec_R + a_right);
 			double S_l = -S_r;
@@ -180,7 +172,6 @@ int main()
 			
 			T = T.transpose();
 			Vector F_res = T * F_hll;
-			//cout << F_res << endl;
 			// Обноваление значений
 			for (int k = 0; k < 5; ++k)
 			{
@@ -194,7 +185,7 @@ int main()
 		{
 			Vector F_hll(5);
 			Matrix T(5, 5);
-			if (fabs(bsurfaces1[j].nz - 1.0) < epsilon)
+			if (abs(bsurfaces1[j].nz - 1.0) < epsilon)
 			{
 				T.setElement(0, 0, 1.0);
 				T.setElement(1, 3, 1.0);
@@ -202,7 +193,7 @@ int main()
 				T.setElement(4, 4, 1.0);
 				T.setElement(3, 1, -1.0);
 			}
-			else if (fabs(bsurfaces1[j].nz + 1.0) < epsilon)
+			else if (abs(bsurfaces1[j].nz + 1.0) < epsilon)
 			{
 				T.setElement(0, 0, 1.0);
 				T.setElement(1, 3, -1.0);
@@ -210,7 +201,7 @@ int main()
 				T.setElement(4, 4, 1.0);
 				T.setElement(3, 1, 1.0);
 			}
-			else if (fabs(bsurfaces1[j].nz * bsurfaces1[j].nz - 1.0) > epsilon)
+			else if (abs(bsurfaces1[j].nz * bsurfaces1[j].nz - 1.0) > epsilon)
 			{
 				T.setElement(0, 0, 1.0);
 				T.setElement(1, 1, bsurfaces1[j].nx);
@@ -223,12 +214,9 @@ int main()
 				T.setElement(3, 3, sqrt(1.0 - bsurfaces1[j].nz * bsurfaces1[j].nz));
 				T.setElement(4, 4, 1.0);
 			}
-			//cout << bsurfaces1[j].nz << endl;
-			//cout << T << endl;
 			// Переход в локальную систему координат
 			Vector U_rotated = T * U[bsurfaces1[j].element1];
 			Vector primitive_rotated = get_primitives(U_rotated);
-			//cout << U_rotated << endl;
 			if (bsurfaces1[j].type == FreedomExit)
 			{
 				//cout << "сверхзвуковая граница выхода" << endl;
@@ -269,7 +257,6 @@ int main()
 			}
 			T = T.transpose();
 			Vector F_res = T * F_hll;
-			//cout << F_res << endl;
 			for (int k = 0; k < 5; ++k)
 			{
 				U_new.getElements()[bsurfaces1[j].element1][k] -= (F_res[k] * (tau * bsurfaces1[j].area / hexahedrons1[bsurfaces1[j].element1].volume));
@@ -285,10 +272,6 @@ int main()
 			primitive.getElements()[j][2] = U_new[j][2] / primitive.getElements()[j][0];
 			primitive.getElements()[j][3] = U_new[j][3] / primitive.getElements()[j][0];
 			primitive.getElements()[j][4] = 0.4 * (U_new[j][4] - primitive.getElements()[j][0] * 0.5 *(primitive.getElements()[j][1] * primitive.getElements()[j][1] + primitive.getElements()[j][2] * primitive.getElements()[j][2] + primitive.getElements()[j][3] * primitive.getElements()[j][3]));
-			//cout << U.getElements()[j][0] << U.getElements()[j][1] << U.getElements()[j][2] << U.getElements()[j][3] << U.getElements()[j][4] << endl;
-			//cout << U_new.getElements()[j][0] << U_new.getElements()[j][1] << U_new.getElements()[j][2] << U_new.getElements()[j][3] << U_new.getElements()[j][4] << endl;
-			//cout << primitive.getElements()[j][0] << primitive.getElements()[j][1] << primitive.getElements()[j][2] << primitive.getElements()[j][3] << primitive.getElements()[j][4] << endl;
-			//cout << "--------------------------------------------------------------------------" << endl;
 		}
 		if (i == 4)
 		{

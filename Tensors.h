@@ -35,7 +35,7 @@ public:
 	void addElement(int axle, int row, int column, double element);  // Добавление элемента к заданному значению
 
 	Tensor3& operator =(const Tensor3& tensor);  // Оператор присваивания
-	Matrix& operator [](const int index);
+	Matrix operator [](const int index);
 
 	friend std::ostream& operator<<(std::ostream&, const Tensor3& tensor);
 	~Tensor3()  // Деструктор

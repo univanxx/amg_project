@@ -68,7 +68,7 @@ Tensor3& Tensor3::operator =(const Tensor3& tensor)
 	return (*this);
 }
 
-Matrix& Tensor3::operator [](const int index)
+Matrix Tensor3::operator [](const int index)
 {
 	int len_column = (*this).getColumns();
 	int len_row = (*this).getRows();
