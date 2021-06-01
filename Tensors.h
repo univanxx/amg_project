@@ -13,32 +13,32 @@ private:
 	double*** elements;
 
 public:
-	Tensor3(int number_axis, int number_rows, int number_columns);  // Создаётся нулевой тензор заданных размеров
-	Tensor3(const Tensor3& tensor);  // Копирование
-	double*** getElements() const  // Получение элементов тензора
+	Tensor3(int number_axis, int number_rows, int number_columns);  // РЎРѕР·РґР°С‘С‚СЃСЏ РЅСѓР»РµРІРѕР№ С‚РµРЅР·РѕСЂ Р·Р°РґР°РЅРЅС‹С… СЂР°Р·РјРµСЂРѕРІ
+	Tensor3(const Tensor3& tensor);  // РљРѕРїРёСЂРѕРІР°РЅРёРµ
+	double*** getElements() const  // РџРѕР»СѓС‡РµРЅРёРµ СЌР»РµРјРµРЅС‚РѕРІ С‚РµРЅР·РѕСЂР°
 	{
 		return elements;
 	};
-	int getAxes() const  // Получение количества осей
+	int getAxes() const  // РџРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° РѕСЃРµР№
 	{
 		return axis;
 	};
-	int getRows() const  // Получение количества строк
+	int getRows() const  // РџРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° СЃС‚СЂРѕРє
 	{
 		return rows;
 	};
-	int getColumns() const  // Получение количества столбцов
+	int getColumns() const  // РџРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° СЃС‚РѕР»Р±С†РѕРІ
 	{
 		return columns;
 	};
-	void setElement(int axle, int row, int column, double element);  // Передача элемента в заданную позицию
-	void addElement(int axle, int row, int column, double element);  // Добавление элемента к заданному значению
+	void setElement(int axle, int row, int column, double element);  // РџРµСЂРµРґР°С‡Р° СЌР»РµРјРµРЅС‚Р° РІ Р·Р°РґР°РЅРЅСѓСЋ РїРѕР·РёС†РёСЋ
+	void addElement(int axle, int row, int column, double element);  // Р”РѕР±Р°РІР»РµРЅРёРµ СЌР»РµРјРµРЅС‚Р° Рє Р·Р°РґР°РЅРЅРѕРјСѓ Р·РЅР°С‡РµРЅРёСЋ
 
-	Tensor3& operator =(const Tensor3& tensor);  // Оператор присваивания
-	Matrix& operator [](const int index);
+	Tensor3& operator =(const Tensor3& tensor);  // РћРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ
+	Matrix operator [](const int index);
 
 	friend std::ostream& operator<<(std::ostream&, const Tensor3& tensor);
-	~Tensor3()  // Деструктор
+	~Tensor3()  // Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	{
 		for (int i = 0; i < axis; ++i)
 		{
