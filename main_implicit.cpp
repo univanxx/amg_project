@@ -115,6 +115,7 @@ Vector F_hll(int j, double epsilon, Matrix &U)
 	return F_res;
 }
 
+
 Matrix R(int j, const Matrix &U, double epsilon)
 {
 	// Консервативыне переменные элемента1, находим по ребру. Нормаль к ребру = нормаль к элементу1.
@@ -342,7 +343,6 @@ Matrix L(int j, const Matrix &U, double epsilon)
 		L.setElement(4, 4, 0);
 		return L;
 	}
-	
 }
 
 Matrix I_m(int j, const Matrix &U)
@@ -511,7 +511,6 @@ int main()
 	
 
 	// efvm.SaveSolutionInGMSHFile();
-	
 	delete[] points1;
 	delete[] isurfaces1;
 	delete[] bsurfaces1;
