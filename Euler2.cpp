@@ -7,13 +7,17 @@
 
 void Euler::Decoding()
 {
-    for (int j = 0; j < count_elements1; ++j)
-    {
-        m_rho[j] = m_u0[j];
-        m_w1[j] = m_u1[j] / m_rho[j];
-        m_w2[j] = m_u2[j] / m_rho[j];
-        m_w3[j] = m_u3[j] / m_rho[j];
-        pressure[j] = 0.4 * (m_u4[j] - m_rho[j] * 0.5 * (m_w1[j] * m_w1[j] + m_w2[j] * m_w2[j] + m_w3[j] * m_w3[j]));
+    for (int j = 0, n = 0; j < count_internal_points1; ++j) {
+        if (points1[j].is_node_on_real_border)
+        {
+            m_rho[n] = m_u0[j];
+            m_w1[n] = m_u1[j] / m_rho[n];
+            m_w2[n] = m_u2[j] / m_rho[n];
+            m_w3[n] = m_u3[j] / m_rho[n];
+            pressure[n] = (1.4 - 1.0) * (m_u4[j] - \
+                                      m_rho[n] * 0.5 * (m_w1[n]*m_w1[n] + m_w2[n]*m_w2[n] + m_w3[n]*m_w3[n]));
+            ++n;
+        }
     }
 }
 
@@ -98,6 +102,7 @@ void Euler::SaveMeshInGMSHFile()
 void Euler::SaveSolutionInGMSHFile()
 {
     Decoding();
+    ++m_step;
     static int N = 0; // количество точек на реальной поверхности
     if (!N)
         for (int i = 0; i < count_points1; ++i)
@@ -203,10 +208,4 @@ void Euler::SaveSolutionInGMSHFile()
     std::ofstream ofst(m_gmsh_file.c_str(), std::ios_base::app);
     ofst << ar.str();
     ofst.close();
-
-    delete[] m_rho;
-    delete[] m_w1;
-    delete[] m_w2;
-    delete[] m_w3;
-    delete[] pressure;
 }
