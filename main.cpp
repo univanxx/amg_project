@@ -47,6 +47,7 @@ Vector get_fluxes(Vector& primitives)
 int main()
 {
     mesh::LoadMesh("C:/Users/wchhi/source/repos/EulerProj/EulerProj/meshes/riemann.txt");
+	Euler efvm;
 	//mesh::LoadMesh("C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/meshes/mymesh.txt");
 	// Шаг по времени
     double tau = 0.001;
@@ -62,6 +63,12 @@ int main()
             primitive.setElement(i, 2, 0.0);  // v
             primitive.setElement(i, 3, 0.0);  // w
             primitive.setElement(i, 4, 0.1);  // p
+			// Граничные условия для сверхзвуковой границы входа
+			efvm.ro_lim[i] = 0.125;
+			efvm.w1_lim[i] = 0.0;
+			efvm.w2_lim[i] = 0.0;
+			efvm.w3_lim[i] = 0.0;
+			efvm.p_lim[i] = 0.1;
         }
         else if (points1[i].entry_or_boundary_condition == 1)
         {
@@ -70,20 +77,17 @@ int main()
             primitive.setElement(i, 2, 0.0);
             primitive.setElement(i, 3, 0.0);
             primitive.setElement(i, 4, 1.0);
+			// Граничные условия для сверхзвуковой границы входа
+			efvm.ro_lim[i] = 1.0;
+			efvm.w1_lim[i] = 0.0;
+			efvm.w2_lim[i] = 0.0;
+			efvm.w3_lim[i] = 0.0;
+			efvm.p_lim[i] = 1.0;
         }
     }
 
-    // Граничные условия для сверхзвуковой границы входа
-	Vector v_lim(3);
-	v_lim[0] = 0;
-	v_lim[1] = 0;
-	v_lim[2] = 0;
-	double ro_lim = 0.125;
-	double p_lim = 0.1;
-
 	// Решение
-	Euler efvm;
-
+	
 	// Консервативные переменные
     Matrix U(count_elements1, 5);
 	// Время - 0.25 секунды, шаг - 0.001 -> всего 250 итераций
@@ -219,12 +223,15 @@ int main()
 			else //(bsurfaces1[j].type == Custom)
 			{
 				//cout << "Сверхзвуковая граница входа" << endl;
-				double v_n_lim = v_lim[0] * bsurfaces1[j].nx + v_lim[1] * bsurfaces1[j].ny + v_lim[2] * bsurfaces1[j].nz;
-				F[0] = ro_lim * v_n_lim;
-				F[1] = ro_lim * v_lim[0] * v_n_lim + p_lim * bsurfaces1[j].nx;
-				F[2] = ro_lim * v_lim[1] * v_n_lim + p_lim * bsurfaces1[j].ny;
-				F[3] = ro_lim * v_lim[2] * v_n_lim + p_lim * bsurfaces1[j].nz;
-				F[4] = ro_lim * v_n_lim * (p_lim + 2.5 * p_lim + 0.5 * ro_lim * (v_lim[0] * v_lim[0] + v_lim[1] * v_lim[1] + v_lim[2] * v_lim[2]));
+				double v_n_lim = efvm.w1_lim[bsurfaces1[j].element1] * bsurfaces1[j].nx + efvm.w2_lim[bsurfaces1[j].element1] * bsurfaces1[j].ny + efvm.w3_lim[bsurfaces1[j].element1] * bsurfaces1[j].nz;
+
+				F[0] = efvm.ro_lim[bsurfaces1[j].element1] * v_n_lim;
+				F[1] = efvm.ro_lim[bsurfaces1[j].element1] * efvm.w1_lim[bsurfaces1[j].element1] * v_n_lim + efvm.p_lim[bsurfaces1[j].element1] * bsurfaces1[j].nx;
+				F[2] = efvm.ro_lim[bsurfaces1[j].element1] * efvm.w2_lim[bsurfaces1[j].element1] * v_n_lim + efvm.p_lim[bsurfaces1[j].element1] * bsurfaces1[j].ny;
+				F[3] = efvm.ro_lim[bsurfaces1[j].element1] * efvm.w3_lim[bsurfaces1[j].element1] * v_n_lim + efvm.p_lim[bsurfaces1[j].element1] * bsurfaces1[j].nz;
+				F[4] = efvm.ro_lim[bsurfaces1[j].element1] * v_n_lim * (efvm.p_lim[bsurfaces1[j].element1] + 2.5 * efvm.p_lim[bsurfaces1[j].element1] + \
+					0.5 * efvm.ro_lim[bsurfaces1[j].element1] * (efvm.w1_lim[bsurfaces1[j].element1] * efvm.w1_lim[bsurfaces1[j].element1] + efvm.w2_lim[bsurfaces1[j].element1] \
+						* efvm.w2_lim[bsurfaces1[j].element1] + efvm.w3_lim[bsurfaces1[j].element1] * efvm.w3_lim[bsurfaces1[j].element1]));
 			}
 
 			for (int k = 0; k < 5; ++k)

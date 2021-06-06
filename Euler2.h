@@ -43,7 +43,8 @@ public:
     double* m_rho, * m_w1, * m_w2, * m_w3, * pressure;
     // универсальная газовая постоянная [Дж / (кг * К)]
     double m_R = 286.7;
-
+    // ГУ
+    double* p_lim, * ro_lim, * w1_lim, * w2_lim, * w3_lim;
 	void SaveMeshInGMSHFile();
 	void SaveSolutionInGMSHFile();
 	// Конструктор
@@ -54,6 +55,12 @@ public:
 		m_u2 = new double[count_elements1];
 		m_u3 = new double[count_elements1];
 		m_u4 = new double[count_elements1];
+
+        p_lim = new double[count_elements1];
+        ro_lim = new double[count_elements1];
+        w1_lim = new double[count_elements1];
+        w2_lim = new double[count_elements1];
+        w3_lim = new double[count_elements1];
 
         int count_real_border_points = 0; // количество точек на реальной поверхности
         for (int i = 0; i < count_elements1; ++i)
@@ -73,6 +80,12 @@ public:
 			m_u2[j] = 0.0;
 			m_u3[j] = 0.0;
 			m_u4[j] = 0.0;
+
+            ro_lim[j] = 0.0;
+            p_lim[j] = 0.0;
+            w1_lim[j] = 0.0;
+            w2_lim[j] = 0.0;
+            w3_lim[j] = 0.0;
 		}
 
         for (int j = 0; j < count_real_border_points; ++j)
@@ -97,6 +110,12 @@ public:
         delete[] m_u2;
         delete[] m_u3;
         delete[] m_u4;
+
+        delete[] ro_lim;
+        delete[] w1_lim;
+        delete[] w2_lim;
+        delete[] w3_lim;
+        delete[] p_lim;
     }
 protected:
 
