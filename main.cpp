@@ -46,7 +46,7 @@ Vector get_fluxes(Vector& primitives)
 
 int main()
 {
-    mesh::LoadMesh("C:/Users/wchhi/source/repos/EulerProj/EulerProj/meshes/mymesh.txt");
+    mesh::LoadMesh("C:/Users/wchhi/source/repos/EulerProj/EulerProj/meshes/riemann.txt");
 	//mesh::LoadMesh("C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/meshes/mymesh.txt");
 	// Шаг по времени
     double tau = 0.001;
@@ -254,6 +254,7 @@ int main()
 			}
 		}
 	}
+	efvm.SaveMeshInGMSHFile();
 	efvm.SaveSolutionInGMSHFile();
 	delete[] points1;
 	delete[] isurfaces1;
@@ -266,3 +267,4 @@ int main()
 	system("pause");
 	return 0;
 }
+
