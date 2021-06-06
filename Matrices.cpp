@@ -37,6 +37,11 @@ void Matrix::addElement(int row, int column, double element)
 	(*this).elements[row][column] += element;
 }
 
+void Matrix::substractElement(int row, int column, double element)
+{
+	(*this).elements[row][column] -= element;
+}
+
 void Matrix::addVector(int row, const Vector& vector)
 {
 	for (int i = 0; i < (*this).getColumns(); ++i)

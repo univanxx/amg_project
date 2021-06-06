@@ -46,51 +46,50 @@ Vector get_fluxes(Vector& primitives)
 
 int main()
 {
-	setlocale(LC_ALL, "Russian");
-	mesh::LoadMesh("C:/Users/wchhi/source/repos/EulerProj/EulerProj/meshes/mymesh.txt");
+    mesh::LoadMesh("C:/Users/wchhi/source/repos/EulerProj/EulerProj/meshes/mymesh.txt");
 	//mesh::LoadMesh("C:/Users/Asus/Documents/Visual Studio 2013/Projects/EulerProject/meshes/mymesh.txt");
 	// Шаг по времени
-	double tau = 0.05;
+    double tau = 0.001;
 	const double epsilon = 1e-10;
-	cout << "Начальные условия:" << endl;
-	Matrix primitive(count_elements1, 5);
-	for (int i = 0; i < count_elements1; ++i)
-	{
-		if (points1[i].entry_or_boundary_condition == 0)
-		{
-			primitive.setElement(i, 0, 0.1);  // ro
-			primitive.setElement(i, 1, 0.5);  // u
-			primitive.setElement(i, 2, 0.6);  // v 
-			primitive.setElement(i, 3, 0.7);  // w
-			primitive.setElement(i, 4, 1.0);  // p
-		}
-		else if (points1[i].entry_or_boundary_condition == 1)
-		{
-			primitive.setElement(i, 0, 1.0);
-			primitive.setElement(i, 1, 0.4);
-			primitive.setElement(i, 2, 0.6);
-			primitive.setElement(i, 3, 0.2);
-			primitive.setElement(i, 4, 0.125);
-		}
-	}
-	cout << "Граничные условия для сверхзвуковой границы входа:" << endl;
+	// Начальные условия
+    Matrix primitive(count_elements1, 5);
+    for (int i = 0; i < count_elements1; ++i)
+    {
+        if (points1[i].entry_or_boundary_condition == 0)
+        {
+            primitive.setElement(i, 0, 0.125);  // ro
+            primitive.setElement(i, 1, 0.0);  // u
+            primitive.setElement(i, 2, 0.0);  // v
+            primitive.setElement(i, 3, 0.0);  // w
+            primitive.setElement(i, 4, 0.1);  // p
+        }
+        else if (points1[i].entry_or_boundary_condition == 1)
+        {
+            primitive.setElement(i, 0, 1.0);
+            primitive.setElement(i, 1, 0.0);
+            primitive.setElement(i, 2, 0.0);
+            primitive.setElement(i, 3, 0.0);
+            primitive.setElement(i, 4, 1.0);
+        }
+    }
+
+    // Граничные условия для сверхзвуковой границы входа
 	Vector v_lim(3);
-	v_lim[0] = 1.5;
-	v_lim[1] = 1.0;
-	v_lim[2] = 0.7;
-	double ro_lim = 1.5;
-	double p_lim = 2.3;
+	v_lim[0] = 0;
+	v_lim[1] = 0;
+	v_lim[2] = 0;
+	double ro_lim = 0.125;
+	double p_lim = 0.1;
 
 	// Решение
 	Euler efvm;
 
 	// Консервативные переменные
-	Matrix U(count_elements1, 5);
-	// Время - 1 секунда, шаг - 0.05 -> всего 5 итераций
-	for (int i = 0; i < 5; ++i)
+    Matrix U(count_elements1, 5);
+	// Время - 0.25 секунды, шаг - 0.001 -> всего 250 итераций
+    for (int i = 0; i < 250; ++i)
 	{
-		cout << endl << i + 1 << "-Й МОМЕНТ ВРЕМЕНИ" << endl;
-		cout << "Переход к консервативным переменным" << endl;
+		cout << endl << i + 1 << "TIME STEP" << endl;
 		// Переход к консервативным переменным
 		for (int j = 0; j < count_elements1; ++j)
 		{
@@ -101,13 +100,12 @@ int main()
 			U.setElement(j, 4, 2.5 * primitive.getElements()[j][4] + primitive.getElements()[j][0] * 0.5 * (primitive.getElements()[j][1] * primitive.getElements()[j][1] + primitive.getElements()[j][2] * primitive.getElements()[j][2] + primitive.getElements()[j][3] * primitive.getElements()[j][3]));
 		}
 		// Вектор для обновлённых значений U
-		Matrix U_new = U;
-		cout << "Проходимся по внутренним граням" << endl;
+        Matrix U_new = U;
 		// Проходимся по внутренним элементам
 		for (int j = 0; j < count_internal_surfaces1; ++j)
 		{
-			Matrix T(5, 5);
-			if (abs(isurfaces1[j].nz - 1.0) < epsilon)
+            Matrix T(5, 5);
+            if (abs(isurfaces1[j].nz - 1.0) < epsilon)
 			{
 				T.setElement(0, 0, 1.0);
 				T.setElement(1, 3, 1.0);
@@ -123,7 +121,7 @@ int main()
 				T.setElement(4, 4, 1.0);
 				T.setElement(3, 1, 1.0);
 			}
-			else if (abs(isurfaces1[j].nz*isurfaces1[j].nz - 1.0) > epsilon)
+            else //if (abs(isurfaces1[j].nz*isurfaces1[j].nz - 1.0) > epsilon)
 			{
 				T.setElement(0, 0, 1.0);
 				T.setElement(1, 1, isurfaces1[j].nx);
@@ -137,14 +135,16 @@ int main()
 				T.setElement(4, 4, 1.0);
 			}
 			// Нахождение потока по методу HLL. Переход в локальную систему координат
-			Vector U_left = T * U[isurfaces1[j].element1];
-			Vector U_right = T * U[isurfaces1[j].element2];
+            Vector U_left = T * U[isurfaces1[j].element1];
+            Vector U_right = T * U[isurfaces1[j].element2];
 
-			Vector primitive_left = get_primitives(U_left);
-			Vector primitive_right = get_primitives(U_right);
+            Vector primitive_left = get_primitives(U_left);
+            Vector primitive_right = get_primitives(U_right);
+
 			// Скорость звука
 			double a_left = sqrt(1.4 * (primitive_left[4] / primitive_left[0]));
 			double a_right = sqrt(1.4 *(primitive_right[4] / primitive_right[0]));
+
 			// Нормальная компонента скорости 
 			double absVec_L = abs(primitive_left[1]);
 			double absVec_R = abs(primitive_right[1]);
@@ -152,10 +152,10 @@ int main()
 			double S_r = max(absVec_L + a_left, absVec_R + a_right);
 			double S_l = -S_r;
 
-			Vector F_left = get_fluxes(primitive_left);
-			Vector F_right = get_fluxes(primitive_right);
+            Vector F_left = get_fluxes(primitive_left);
+            Vector F_right = get_fluxes(primitive_right);
 
-			Vector F_hll(5);
+            Vector F_hll(5);
 			if (S_l >= 0.0)
 			{
 				F_hll = F_left;
@@ -171,22 +171,22 @@ int main()
 			// Переход из локальной системы координат в главную
 			
 			T = T.transpose();
-			Vector F_res = T * F_hll;
+            Vector F_res = T * F_hll;
+
 			// Обноваление значений
 			for (int k = 0; k < 5; ++k)
 			{
-				U_new.getElements()[isurfaces1[j].element1][k] -= (F_res[k] * (tau * isurfaces1[j].area / hexahedrons1[isurfaces1[j].element1].volume));
-				U_new.getElements()[isurfaces1[j].element2][k] += (F_res[k] * (tau * isurfaces1[j].area / hexahedrons1[isurfaces1[j].element1].volume));
+				U_new.substractElement(isurfaces1[j].element1, k, (F_res[k] * (tau * isurfaces1[j].area / hexahedrons1[isurfaces1[j].element1].volume)));
+				U_new.addElement(isurfaces1[j].element2, k, (F_res[k] * (tau * isurfaces1[j].area / hexahedrons1[isurfaces1[j].element2].volume)));
 			}
 		}
-		// Проходимся по граничным элементам
-		cout << "Проходимся по граничным граням" << endl;
+		// Проходимся по граничным граням
 		for (int j = 0; j < count_boundary_surfaces1; ++j)
 		{
-			Vector F(5);
+            Vector F(5);
 
-			Vector U_b = U[bsurfaces1[j].element1];
-			Vector primitive_b = get_primitives(U_b);
+            Vector U_b = U[bsurfaces1[j].element1];
+            Vector primitive_b = get_primitives(U_b);
 
 			if (bsurfaces1[j].type == FreedomExit)
 			{
@@ -196,7 +196,7 @@ int main()
 				F[1] = primitive_b[0] * primitive_b[1] * v_n + primitive_b[4] * bsurfaces1[j].nx;
 				F[2] = primitive_b[0] * primitive_b[2] * v_n + primitive_b[4] * bsurfaces1[j].ny;
 				F[3] = primitive_b[0] * primitive_b[3] * v_n + primitive_b[4] * bsurfaces1[j].nz;
-				F[4] = primitive_b[0] * v_n * (2.5 * primitive_b[4] + 0.5 * primitive_b[0] * (primitive_b[1] * primitive_b[1] + primitive_b[2] * primitive_b[2] + primitive_b[3] * primitive_b[3]));
+                F[4] = primitive_b[0] * v_n * (primitive_b[4] + 2.5 * primitive_b[4] + 0.5 * primitive_b[0] * (primitive_b[1] * primitive_b[1] + primitive_b[2] * primitive_b[2] + primitive_b[3] * primitive_b[3]));
 			}
 			else if (bsurfaces1[j].type == HardBorder)
 			{
@@ -229,22 +229,21 @@ int main()
 
 			for (int k = 0; k < 5; ++k)
 			{
-				U_new.getElements()[bsurfaces1[j].element1][k] -= (F[k] * (tau * bsurfaces1[j].area / hexahedrons1[bsurfaces1[j].element1].volume));
+				U_new.substractElement(bsurfaces1[j].element1, k, (F[k] * (tau* bsurfaces1[j].area / hexahedrons1[bsurfaces1[j].element1].volume)));
 			}
 		}
-		cout << "Переход к примитивным переменным" << endl;
 		// Переход к примитивным элементам
 		for (int j = 0; j < count_elements1; ++j)
 		{
-			primitive.getElements()[j][0] = U_new[j][0];
-			primitive.getElements()[j][1] = U_new[j][1] / primitive.getElements()[j][0];
-			primitive.getElements()[j][2] = U_new[j][2] / primitive.getElements()[j][0];
-			primitive.getElements()[j][3] = U_new[j][3] / primitive.getElements()[j][0];
-			primitive.getElements()[j][4] = 0.4 * (U_new[j][4] - primitive.getElements()[j][0] * 0.5 *(primitive.getElements()[j][1] * primitive.getElements()[j][1] + primitive.getElements()[j][2] * primitive.getElements()[j][2] + primitive.getElements()[j][3] * primitive.getElements()[j][3]));
+			primitive.setElement(j, 0, U_new.getElements()[j][0]);
+			primitive.setElement(j, 1, U_new.getElements()[j][1] / primitive.getElements()[j][0]);
+			primitive.setElement(j, 2, U_new.getElements()[j][2] / primitive.getElements()[j][0]);
+			primitive.setElement(j, 3, U_new.getElements()[j][3] / primitive.getElements()[j][0]);
+			primitive.setElement(j, 4, 0.4 * (U_new.getElements()[j][4] - primitive.getElements()[j][0] * 0.5 * (primitive.getElements()[j][1] * primitive.getElements()[j][1] + primitive.getElements()[j][2] * primitive.getElements()[j][2] + primitive.getElements()[j][3] * primitive.getElements()[j][3])));
 		}
-		if (i == 4)
+        if (i == 249)
 		{
-			cout << "Решение найдено!" << endl;
+			cout << "SOLUTION FOUND!" << endl;
 			for (int j = 0; j < count_elements1; ++j)
 			{
 				efvm.m_u0[j] = U_new[j][0];
@@ -267,4 +266,3 @@ int main()
 	system("pause");
 	return 0;
 }
-
