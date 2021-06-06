@@ -28,6 +28,7 @@ public:
 	};
 	void setElement(int row, int column, double element);  // Передача элемента в заданную позицию
 	void addElement(int row, int column, double element);  // Добавление элемента к заданному значению
+	void substractElement(int row, int column, double element);  // Вычитание элемента из заданной позиции
 	void addVector(int row, const Vector& vector);  // Добавление вектора к заданной строке
 	Matrix transpose() const;  // Транспонирование матрицы
 	Matrix& operator =(const Matrix& matrix);  // Оператор присваивания

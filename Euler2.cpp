@@ -7,7 +7,8 @@
 
 void Euler::Decoding()
 {
-    for (int j = 0, n = 0; j < count_internal_points1; ++j) {
+    for (int j = 0, n = 0; j < count_elements1; ++j) 
+    {
         if (points1[j].is_node_on_real_border)
         {
             m_rho[n] = m_u0[j];
